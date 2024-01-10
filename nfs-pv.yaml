@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-nfs-share
+spec:
+  capacity:
+    storage: 500Mi
+  accessModes: ["ReadWriteOnce"]
+  storageClassName: nfs
+  nfs:
+    server: 44.211.213.216
+    path: /nfs-datadir
+

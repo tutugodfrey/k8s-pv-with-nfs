@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app: nginx
+  name: nginx
+spec:
+  replicas: 3
+  serviceName: nginx-service
+  selector:
+    matchLabels:
+      app: nginx
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginx
+    spec:
+      initContainers:
+      - name: dataproducer
+        image: busybox:latest
+        command: ["/bin/sh", "-c", "echo the current time is $(date) > /data/index.html;"]
+        volumeMounts:
+        - name: data-dir
+          mountPath: /data
+      containers:
+      - image: nginx
+        name: nginx
+        resources: {}
+        volumeMounts:
+        - name: data-dir
+          mountPath: /usr/share/html/nginx
+#      volumes:
+#      - name: data-dir
+#        persistentVolumeClaim:
+#          claimName: my-hostname-volume-nginx`
+
+  volumeClaimTemplates:
+  - metadata:
+      name: data-dir
+    spec:
+      storageClassName: nfs-client
+      accessModes:
+      - "ReadWriteOnce"
+      resources:
+        requests:
+          storage: 200Mi
+      #selector:
+       #  matchLabels:
+         # type: local
